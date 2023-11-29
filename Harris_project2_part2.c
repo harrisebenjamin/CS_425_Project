@@ -1,10 +1,10 @@
 /*
 Benjamin Harris and Jeremiah Harris
-Project 2 Part 1
+Project 2 Part 2
 CS 425
 11/27/23
 
-Producer Consumer problem using semaphores
+Producer Consumer problem using Spin locks
 */
 
 #include <stdio.h>
@@ -24,7 +24,8 @@ void *producer(void *);
 void *consumer(void *);
 
 //Shared Variables
-sem_t full, empty, mutex;
+pthread_spinlock_t lock;
+sem_t full, empty;
 int consumedCount = 0;
 int producedCount = 0;
 int *buffer;
@@ -33,7 +34,7 @@ int out = 0;
 
 int main(int argc, char *argv[]){
 
-    printf("\nUsing Semaphore\n");
+    printf("\nUsing Spinlock\n");
 
     int bufferSize = atoi(argv[1]);
     buffer =  (int*) malloc(sizeof(int) * bufferSize);
@@ -46,7 +47,7 @@ int main(int argc, char *argv[]){
     
     sem_init(&full, 0, 0);
     sem_init(&empty, 0, bufferSize);
-    sem_init(&mutex, 0, 1);
+    pthread_spin_init(&lock, PTHREAD_PROCESS_PRIVATE);
 
     
     int i;
@@ -90,14 +91,14 @@ void *producer(void *param){
 
     while(producedCount<= data->upper_limit){
         sem_wait(&empty);
-        sem_wait(&mutex);
+        pthread_spin_lock(&lock);
 
         int next_produced = producedCount;
         producedCount++;
         buffer[in] = next_produced;
         in = (in + 1) % data->buffer_size; 
 
-        sem_post(&mutex);
+        pthread_spin_unlock(&lock);
         sem_post(&full);
     }
 
@@ -112,7 +113,7 @@ void *consumer(void *param){
 
     while(consumedCount < data->upper_limit){
         sem_wait(&full);
-        sem_wait(&mutex);
+        pthread_spin_lock(&lock);
 
         int item = buffer[out];
         printf("%d %d\n", item, data->tid);
@@ -120,7 +121,7 @@ void *consumer(void *param){
 
         consumedCount++;
 
-        sem_post(&mutex);
+        pthread_spin_unlock(&lock);
         sem_post(&empty);
 
     }
