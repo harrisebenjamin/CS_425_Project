@@ -88,18 +88,10 @@ void *producer(void *param){
         sem_wait(&empty);
         sem_wait(&mutex);
 
-        // if(producedCount <= data->upper_limit){
-        //     int next_produced = producedCount;
-        //     producedCount++;
-        //     buffer[in] = next_produced;
-        //     in = (in + 1) % data->buffer_size; 
-        // }
-
         int next_produced = producedCount;
         producedCount++;
         buffer[in] = next_produced;
         in = (in + 1) % data->buffer_size; 
-
 
         sem_post(&mutex);
         sem_post(&full);
