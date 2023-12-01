@@ -25,7 +25,6 @@ void *consumer(void *);
 
 //Shared Variables
 sem_t full, empty, mutex;
-int consumedCount = 0;
 int producedCount = 0;
 int *buffer;
 int in = 0;
@@ -88,7 +87,7 @@ void *producer(void *param){
     struct v *data;
     data = (struct v*) param;
 
-    while(producedCount<= data->upper_limit){
+    while(producedCount <= data->upper_limit){
         sem_wait(&empty);
         sem_wait(&mutex);
 
@@ -110,15 +109,14 @@ void *consumer(void *param){
     data = (struct v*) param;
 
 
-    while(consumedCount < data->upper_limit){
+    while(1){
         sem_wait(&full);
         sem_wait(&mutex);
 
         int item = buffer[out];
         printf("%d %d\n", item, data->tid);
+        if(item == data->upper_limit){exit(0);}
         out = (out + 1) % data->buffer_size;
-
-        consumedCount++;
 
         sem_post(&mutex);
         sem_post(&empty);
