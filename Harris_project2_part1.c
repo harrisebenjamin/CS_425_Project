@@ -11,6 +11,7 @@ Producer Consumer problem using semaphores
 #include <stdlib.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include <time.h>
 
 struct v{
     int tid;
@@ -30,6 +31,10 @@ int *buffer;
 int in = 0;
 int out = 0;
 
+//Code for time exeriments
+// clock_t startTime;
+// clock_t endTime;
+
 int main(int argc, char *argv[]){
 
     printf("\nUsing Semaphore\n");
@@ -47,6 +52,8 @@ int main(int argc, char *argv[]){
     sem_init(&empty, 0, bufferSize);
     sem_init(&mutex, 0, 1);
 
+    //Code for time exeriments
+    // startTime = clock();
     
     int i;
     for(i = 0; i < num_producers; i++){
@@ -77,7 +84,7 @@ int main(int argc, char *argv[]){
 
     for(i = 0; i < num_consumers; i++){
         pthread_join(tid_consumer[i], NULL);
-    } 
+    }
 
     return 0;
 }
@@ -90,6 +97,10 @@ void *producer(void *param){
     while(producedCount <= data->upper_limit){
         sem_wait(&empty);
         sem_wait(&mutex);
+
+        //Code for time exeriments
+        // int j;
+        // for (j = 0; j < 1e8; j++);
 
         int next_produced = producedCount;
         producedCount++;
@@ -113,9 +124,21 @@ void *consumer(void *param){
         sem_wait(&full);
         sem_wait(&mutex);
 
+        //Code for time exeriments
+        // int j;
+        // for (j = 0; j < 1e8; j++);
+
         int item = buffer[out];
         printf("%d %d\n", item, data->tid);
-        if(item == data->upper_limit){exit(0);}
+        if(item == data->upper_limit){
+
+            //Code for time exeriments
+            // endTime = clock();
+            // double totalTime = (double)(endTime - startTime) / CLOCKS_PER_SEC;
+            // printf("Elapsed Time : %lf Seconds\n", totalTime);
+
+            exit(0);
+        }
         out = (out + 1) % data->buffer_size;
 
         sem_post(&mutex);

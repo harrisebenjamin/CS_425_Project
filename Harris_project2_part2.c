@@ -11,6 +11,7 @@ Producer Consumer problem using Spin locks
 #include <stdlib.h>
 #include <pthread.h>
 #include <semaphore.h>
+#include <time.h>
 
 struct v{
     int tid;
@@ -31,6 +32,10 @@ int *buffer;
 int in = 0;
 int out = 0;
 
+//Code for time exeriments
+// clock_t startTime;
+// clock_t endTime;
+
 int main(int argc, char *argv[]){
 
     printf("\nUsing Spinlock\n");
@@ -47,6 +52,9 @@ int main(int argc, char *argv[]){
     sem_init(&full, 0, 0);
     sem_init(&empty, 0, bufferSize);
     pthread_spin_init(&lock, PTHREAD_PROCESS_PRIVATE);
+
+    //Code for time exeriments
+    // startTime = clock();
 
     
     int i;
@@ -92,6 +100,10 @@ void *producer(void *param){
         sem_wait(&empty);
         pthread_spin_lock(&lock);
 
+        //Code for time exeriments
+        // int j;
+        // for (j = 0; j < 1e8; j++);
+
         int next_produced = producedCount;
         producedCount++;
         buffer[in] = next_produced;
@@ -114,9 +126,21 @@ void *consumer(void *param){
         sem_wait(&full);
         pthread_spin_lock(&lock);
 
+        //Code for time exeriments
+        // int j;
+        // for (j = 0; j < 1e8; j++);
+
         int item = buffer[out];
         printf("%d %d\n", item, data->tid);
-        if(item == data->upper_limit){exit(0);}
+        if(item == data->upper_limit){
+
+            //Code for time exeriments
+            // endTime = clock();
+            // double totalTime = (double)(endTime - startTime) / CLOCKS_PER_SEC;
+            // printf("Elapsed Time : %lf Seconds\n", totalTime);
+
+            exit(0);
+        }
         out = (out + 1) % data->buffer_size;
 
         pthread_spin_unlock(&lock);
